@@ -1,5 +1,7 @@
 export function asBoolean<T>(value: T): boolean {
-  if (value === null) return false;
+  if (value === null) {
+    return false;
+  }
   
   switch (typeof value) {
     case "boolean":
@@ -10,11 +12,12 @@ export function asBoolean<T>(value: T): boolean {
       return true;
     case "undefined":
       return false;
-    case "bigint":
     case "number":
       return numberAsBoolean(value);
+    case "bigint":
+      return bigintAsBoolean(value);
     case "symbol":
-      return asBoolean(value.toString());
+      return asBoolean(value.toString().slice(7, -1));
     case "object":
       return objectAsBoolean(value);
     default:
@@ -22,7 +25,11 @@ export function asBoolean<T>(value: T): boolean {
   }
 }
 
-function numberAsBoolean(value: number | bigint): boolean {
+function numberAsBoolean(value: number): boolean {
+  if (isNaN(value)) {
+    return false;
+  }
+  
   switch (value) {
     case 1:
       return true;
@@ -34,17 +41,32 @@ function numberAsBoolean(value: number | bigint): boolean {
   }
 }
 
+function bigintAsBoolean(value: bigint): boolean {
+  if (value === BigInt("1")) {
+    return true;
+  }
+  
+  if (value === BigInt("0") || value === BigInt("-1")) {
+    return false;
+  }
+  
+  throw new Error(`Given value of type 'number' does not contain a truthy value: '${value}'`);
+}
+
 function objectAsBoolean(value: object): boolean {
   if (Array.isArray(value) || value instanceof Buffer) {
     return !!value.length;
   }
+  
   const boolean_object = value as BooleanObject;
   if (boolean_object.toBoolean && typeof boolean_object.toBoolean === "function") {
     return boolean_object.toBoolean.call(value);
   }
+  
   if (value instanceof Date) {
     return value.getTime() > 0;
   }
+  
   return !!Object.keys(value).length;
 }
 
