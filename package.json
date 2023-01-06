@@ -1,7 +1,7 @@
 {
   "name":            "@noxy/as-boolean",
   "author":          "oscelest",
-  "version":         "0.0.0",
+  "version":         "0.1.0",
   "description":     "Converts a truthy value or string to a boolean.",
   "license":         "MIT",
   "repository":      {
