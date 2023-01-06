@@ -6,16 +6,6 @@ on:
       - 'v*'
 
 jobs:
-  get-version:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Get version from tag
-        id: set-version
-        run: echo "NPM_VERSION=$(echo $GITHUB_REF | sed -s 's/.*\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/')" >> $GITHUB_ENV
-      - name: Current version ${{ env.NPM_VERSION }}
-        run: echo "${{ env.NPM_VERSION }}"
-
   publish-npm:
     needs: get-version
     runs-on: ubuntu-latest
@@ -25,18 +15,15 @@ jobs:
         with:
           node-version: '18.x'
           registry-url: https://registry.npmjs.org/
+      - name: Get version from tag
+        id: set-version
+        run: echo "NPM_VERSION=$(echo $GITHUB_REF | sed -s 's/.*\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/')" >> $GITHUB_ENV
       - run: npm ci
       - run: npm run build
       - run: npm version ${{ env.NPM_VERSION }} --no-git-tag-version --silent
       - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  update-version:
-    needs: [ get-version, publish-npm ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
       - name: Set up GitHub Actions Bot
         run: |
           git config user.name "GitHub Actions Bot"
