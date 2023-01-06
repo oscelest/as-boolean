@@ -6,16 +6,7 @@ on:
       - 'v*'
 
 jobs:
-  get-version:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Get version from tag
-        id: set-version
-        run: echo "NPM_VERSION=$(echo $GITHUB_REF | sed -s 's/.*\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/')" >> $GITHUB_ENV
-
   publish-npm:
-    needs: get-version
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -23,25 +14,29 @@ jobs:
         with:
           node-version: '18.x'
           registry-url: https://registry.npmjs.org/
-      - run: npm ci
-      - run: npm run build
-      - run: npm version ${{ env.NPM_VERSION }} --no-git-tag-version --silent
-      - run: npm publish --access public
+          
+      - name: Get version from tag
+        id: set-version
+        run: echo "NPM_VERSION=$(echo $GITHUB_REF | sed -s 's/.*\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/')" >> $GITHUB_ENV
+
+      - name: Get dependencies for building the package
+        run: npm ci
+
+      - name: Build the package
+        run: npm run build
+
+      - name: Apply version
+        run: npm version ${{ env.NPM_VERSION }} --no-git-tag-version
+
+      - name: Publish package to NPM
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  update-version:
-    needs: [ get-version, publish-npm ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
       - name: Set up GitHub Actions Bot
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
-
-      - name: Apply version
-        run: npm version ${{ env.NPM_VERSION }} --no-git-tag-version
 
       - name: Add updated package.json to commit
         run: git add package.json
