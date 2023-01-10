@@ -49,7 +49,7 @@ The following values are regarded as `false`:
 - "no"
 - "false"
 
-Strings are case insensitive. Any other string will return an error.
+Strings are case-insensitive. Any other string will return an error.
 
 ### With numbers or bigint
 
