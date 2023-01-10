@@ -4,7 +4,7 @@
 
 `asBoolean` is a small library to help cast common types in Javascript as boolean instead of having to rely on hacks directly in your code.
 
-The main motivation is to create a more reliable way of interaction with booleans in a human friendly way. This though point is certainly arguable.
+The main motivation is to create a more reliable way of interaction with booleans in a human friendly way. This point, however, is certainly arguable.
 
 ## Installation
 
